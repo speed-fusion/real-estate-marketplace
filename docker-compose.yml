@@ -21,7 +21,7 @@ services:
       - ./services/mongodb/database:/data/db
     restart: always
 
-    api-service:
+    api:
         build: .services/api/
         volumes: 
             - .services/api/:/usr/src/app/
