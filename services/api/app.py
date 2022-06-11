@@ -180,7 +180,7 @@ def preping():
         
         query = generate_address_query(data["address"],data["city"],data["state"],data["zip"])
         
-        property = mongo.db.properties.find_one({"query":query})
+        property = mongo.db.properties.find_one({"query":query},{"status":0,"_id":0})
         
         if property == None:
             return jsonify({'ok': True, 'data':{"status":False,"message":"we do not have any data for this address","meta":None}}), 200
