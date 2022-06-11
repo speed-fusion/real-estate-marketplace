@@ -22,9 +22,9 @@ services:
     restart: always
 
     api:
-        build: .services/api/
+        build: ./services/api/
         volumes: 
-            - .services/api/:/usr/src/app/
+            - ./services/api/:/usr/src/app/
         ports: 
             - 5000:5000
         environment: 
