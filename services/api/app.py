@@ -29,7 +29,7 @@ import json
 
 import os
 
-username = os.environ.get("MONGO_USERNAME") 
+user = os.environ.get("MONGO_USERNAME") 
 password = os.environ.get("MONGO_PASSWORD")
 host = "mongodb"
 database = "real-estate"
@@ -75,7 +75,7 @@ flask_bcrypt = Bcrypt(app)
 app.json_encoder = JSONEncoder
 
 
-app.config["MONGO_URI"] = f'mongodb://{username}:{password}@{host}/{database}?authSource=admin'
+app.config["MONGO_URI"] = f'mongodb://{user}:{password}@{host}/{database}?authSource=admin'
 mongo = PyMongo(app)
 
 ROOT_PATH = os.getcwd()
