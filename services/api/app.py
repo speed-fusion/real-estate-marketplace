@@ -183,11 +183,11 @@ def preping():
         property = mongo.db.properties.find_one({"query":query})
         
         if property == None:
-            return jsonify({'ok': True, 'data':{"status":False,"message":"we do not have any data for this address"}}), 200
+            return jsonify({'ok': True, 'data':{"status":False,"message":"we do not have any data for this address","meta":None}}), 200
                 
         status,message = property_validation.apply_validation(property)
         
-        return jsonify({'ok': True, 'data':{"status":status,"message":message[0]}}), 200
+        return jsonify({'ok': True, 'data':{"status":status,"message":message[0],"meta":property}}), 200
     else:
         return jsonify({'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}), 400
 
