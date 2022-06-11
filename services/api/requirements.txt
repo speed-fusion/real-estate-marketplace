@@ -2,3 +2,4 @@ flask-jwt-extended
 pymongo
 jsonschema
 Flask-Cors
+Flask-PyMongo
