@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 class PropertyValidations:
     def __init__(self):
         
@@ -19,6 +22,29 @@ class PropertyValidations:
         
         self.max_area_sqft = 1.5 * 43560
         
+        self.valid_zipcodes = {}
+        
+        self.cwd = Path.cwd()
+        
+        self.load_valid_zipcodes()
+        
+        
+    def load_valid_zipcodes(self):
+        
+        file_path = self.cwd.joinpath("zipcodes.json")
+        
+        data = None
+        with open(file_path,"rb") as f:
+            data = json.load(f)
+        
+        for zip in data:
+            self.valid_zipcodes[str(zip).strip()] = 1
+            
+    def is_valid_zip(self,zipcode):
+        if str(zipcode).strip() in self.valid_zipcodes:
+            return True,"zipcode is not restricted."
+        else:
+            return False,f'zipcode({zipcode}) is restricted.'
     
     def bedroom_validation(self,bedroom):
         
@@ -102,6 +128,14 @@ class PropertyValidations:
         area_sqft = self.to_int(data["area_sqft"])
         
         fema_flood_zone = data["fema_flood_zone"]
+        
+        zipcode = data["zipcode"]
+        
+        status,message = self.is_valid_zip(zipcode)
+        
+        if status == False:
+            failed.append(message)
+            return False,failed
         
         status,message = self.bedroom_validation(bedroom)
         
