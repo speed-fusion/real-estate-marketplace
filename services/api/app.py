@@ -1,12 +1,10 @@
 
 import datetime
 import pymongo
-import random
-from flask_cors import CORS,cross_origin
+
+from flask_cors import CORS
 from property_validations import PropertyValidations
-import timeago
-import sys
-from flask import Flask,redirect,render_template,send_from_directory
+from flask import Flask
 from flask_pymongo import PyMongo
 
 from flask_jwt_extended import (
@@ -185,13 +183,13 @@ def preping():
         property = mongo.db.properties.find_one({"query":query})
         
         if property == None:
-            return jsonify({'ok': True, 'data':{"status":False,"error_message":["we do not have any data for this address"]}}), 200
+            return jsonify({'ok': True, 'data':{"status":False,"message":"we do not have any data for this address"}}), 200
                 
         status,message = property_validation.apply_validation(property)
         
-        return jsonify({'ok': True, 'data':{"status":status,"error_message":message}}), 200
+        return jsonify({'ok': True, 'data':{"status":status,"message":message[0]}}), 200
     else:
-        return jsonify({'ok': False, 'msg': 'Bad request parameters: {}'.format(data['msg'])}), 400
+        return jsonify({'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}), 400
 
 
 @app.route('/auth', methods=['POST'])
