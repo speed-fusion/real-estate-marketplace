@@ -255,7 +255,5 @@ def register():
     else:
         return jsonify({'ok': False, 'msg': 'Bad request parameters: {}'.format(data['msg'])}), 400
 
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
