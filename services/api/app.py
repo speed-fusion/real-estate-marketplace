@@ -31,7 +31,7 @@ import os
 
 user = os.environ.get("MONGO_USERNAME") 
 password = os.environ.get("MONGO_PASSWORD")
-host = "mongodb"
+host = "mongodb:27017"
 database = "real-estate"
 
 class Database:
