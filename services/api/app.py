@@ -134,7 +134,7 @@ preping_schema = {
         "type":"string",
     },
     "zip":{
-        "type":"string",
+        "type":["string","number"],
     },
     },
     "required": ["address","city","state","zip"],
