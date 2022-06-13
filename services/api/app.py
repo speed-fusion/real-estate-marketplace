@@ -198,7 +198,7 @@ def preping():
         return jsonify({'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}), 400
 
 @app.route("/pre-ping-data",methods=["POST"])
-def preping():
+def preping_data():
     data = validate_payload(request.get_json(),preping_schema)
     if data['ok']:
         data = data['data']
