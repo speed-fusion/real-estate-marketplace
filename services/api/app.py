@@ -183,6 +183,31 @@ def preping():
         property = mongo.db.properties.find_one({"query":query},{"status":0,"_id":0})
         
         if property == None:
+            return jsonify({"result":"Reject"}), 200
+                
+        status,message = property_validation.apply_validation(property)
+        
+        new_status = None
+        if status == False:
+            new_status = "Reject"
+        else:
+            new_status = "Offer"
+        
+        return jsonify({"result":new_status}), 200
+    else:
+        return jsonify({'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}), 400
+
+@app.route("/pre-ping-data",methods=["POST"])
+def preping():
+    data = validate_payload(request.get_json(),preping_schema)
+    if data['ok']:
+        data = data['data']
+        
+        query = generate_address_query(data["address"],data["city"],data["state"],data["zip"])
+        
+        property = mongo.db.properties.find_one({"query":query},{"status":0,"_id":0})
+        
+        if property == None:
             return jsonify({'ok': True, 'data':{"status":False,"message":"we do not have any data for this address","meta":None}}), 200
                 
         status,message = property_validation.apply_validation(property)
