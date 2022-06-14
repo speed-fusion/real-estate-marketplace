@@ -18,16 +18,25 @@ from flask_jwt_extended import (
 
 
 from flask import request, jsonify
-
 import logging
-
 from bson.objectid import ObjectId
-
 from flask_bcrypt import Bcrypt
-
 import json
-
 import os
+
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import SchemaError
+
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import SchemaError
+
+from schemas import user_schema,gs_schema,preping_schema,address_schema
+
+from GreatSchools import GreatSchools
+from ZillowScraper import ZillowScraper
+
 
 user = os.environ.get("MONGO_USERNAME") 
 password = os.environ.get("MONGO_PASSWORD")
@@ -89,58 +98,6 @@ def unauthorized_response(callback):
         'ok': False,
         'msg': 'Missing Authorization Header'
     }), 401
-
-# Create a route to authenticate your users and return JWTs. The
-# create_access_token() function is used to actually generate the JWT.
-
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-from jsonschema.exceptions import SchemaError
-
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-from jsonschema.exceptions import SchemaError
-
-user_schema = {
-    "type": "object",
-    "properties": {
-        "name": {
-            "type": "string",
-        },
-        "email": {
-            "type": "string",
-            "format": "email"
-        },
-        "password": {
-            "type": "string",
-            "minLength": 5
-        }
-    },
-    "required": ["email", "password"],
-    "additionalProperties": False
-}
-
-
-preping_schema = {
-    "type":"object",
-    "properties":{
-    "address":{
-            "type":"string",
-        },
-    "city":{
-        "type":"string",
-    },
-    "state":{
-        "type":"string",
-    },
-    "zip":{
-        "type":["string","number"],
-    },
-    },
-    "required": ["address","city","state","zip"],
-    "additionalProperties": False
-}
-
 
 def validate_payload(data,schema):
     try:
@@ -277,6 +234,41 @@ def register():
                 return jsonify({'ok':False,'msg':'User already exists.'}),200
     else:
         return jsonify({'ok': False, 'msg': 'Bad request parameters: {}'.format(data['msg'])}), 400
+
+
+# great schools
+@app.route('/greatschools',methods=['POST'])
+def greatschools():
+    gs = GreatSchools()
+    data = validate_payload(request.get_json(),gs_schema)
+    if data['ok']:
+        address = data["data"]["address"]
+        data = gs.fetch_data(address)
+    return jsonify({'ok': True, 'data': data})
+# great schools
+
+# zillow
+@app.route('/v1/zillow', methods=['POST'])
+@jwt_required()
+def zillow():
+    data = validate_payload(request.get_json(),address_schema)
+    zs = ZillowScraper()
+    current_user = get_jwt_identity()
+    
+    if data['ok']:
+        data = data['data']
+        mongo.db.users.update({'email': current_user['email']},{"$inc":{"total_requests":1}})
+        address_str = f'{data["site_address"].strip()}-{data["site_city"].strip()}-{data["site_state"].strip()}-{data["site_zip"].strip()}'
+        resp = zs.get_zillow_data(address_str)
+        return jsonify({'ok':resp["status"],'msg':resp["msg"],'data':resp["data"]}),200    
+    else:
+        return jsonify({'ok': False, 'msg': 'Bad request parameters: {}'.format(data['msg'])}), 400
+
+
+# zillow
+
+
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

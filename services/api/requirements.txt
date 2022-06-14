@@ -4,3 +4,4 @@ jsonschema
 Flask-Cors
 Flask-PyMongo
 Flask-Bcrypt
+gunicorn
