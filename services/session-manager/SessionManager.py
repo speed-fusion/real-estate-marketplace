@@ -16,7 +16,7 @@ class Database:
         client = pymongo.MongoClient(connection_uri)
         db = client[db_name]
         self.session = db["session"]
-        
+
 class SessionManager:
     def __init__(self):
         print("Session Manager")
