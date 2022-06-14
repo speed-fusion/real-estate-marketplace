@@ -5,3 +5,4 @@ Flask-Cors
 Flask-PyMongo
 Flask-Bcrypt
 gunicorn
+requests
