@@ -27,8 +27,18 @@ services:
           - ./services/api/:/usr/src/app/
       ports: 
           - 5000:5000
-      
+      restart: always
       env_file: .env
-      environment: 
-          PORT: 5000
-          FLASK_DEBUG: 1
+      
+  proxy:
+    build: ./services/proxy/
+    restart: always
+    ports:
+      - 80:80
+
+    depends_on:
+      - api
+  
+  session-manager:
+    build: ./services/session-manager/
+    env_file: .env
