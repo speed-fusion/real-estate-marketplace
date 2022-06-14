@@ -253,11 +253,9 @@ def greatschools():
 def zillow():
     data = validate_payload(request.get_json(),address_schema)
     zs = ZillowScraper()
-    current_user = get_jwt_identity()
     
     if data['ok']:
         data = data['data']
-        mongo.db.users.update({'email': current_user['email']},{"$inc":{"total_requests":1}})
         address_str = f'{data["site_address"].strip()}-{data["site_city"].strip()}-{data["site_state"].strip()}-{data["site_zip"].strip()}'
         resp = zs.get_zillow_data(address_str)
         return jsonify({'ok':resp["status"],'msg':resp["msg"],'data':resp["data"]}),200    
