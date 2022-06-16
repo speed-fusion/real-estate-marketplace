@@ -28,10 +28,6 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from jsonschema.exceptions import SchemaError
 
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-from jsonschema.exceptions import SchemaError
-
 from schemas import user_schema,gs_schema,preping_schema,address_schema
 
 from GreatSchools import GreatSchools
@@ -51,6 +47,7 @@ class Database:
         db = client[db_name]
         
         self.properties = db["properties"]
+        self.logs = db["logs"]
 
 db = Database()
 
@@ -132,6 +129,10 @@ def generate_address_query(address,city,state,zipcode):
 @app.route("/pre-ping",methods=["POST"])
 def preping():
     data = validate_payload(request.get_json(),preping_schema)
+    log = {}
+    log["ip_addr"] = request.remote_addr
+    log["request_body"] = request.get_json()
+    log["created_at"] = datetime.datetime.now()
     if data['ok']:
         data = data['data']
         
@@ -140,7 +141,10 @@ def preping():
         property = mongo.db.properties.find_one({"query":query},{"status":0,"_id":0})
         
         if property == None:
-            return jsonify({"result":"Reject"}), 200
+            response_body = {"result":"Reject"}
+            log["response_body"] = response_body
+            db.logs.insert_one(log)
+            return jsonify(response_body), 200
                 
         status,message = property_validation.apply_validation(property)
         
@@ -149,10 +153,15 @@ def preping():
             new_status = "Reject"
         else:
             new_status = "Offer"
-        
-        return jsonify({"result":new_status}), 200
+        response_body = {"result":new_status}
+        log["response_body"] = response_body
+        db.logs.insert_one(log)
+        return jsonify(response_body), 200
     else:
-        return jsonify({'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}), 400
+        response_body = {'ok': False,'data':None, 'message': 'Bad request parameters: {}'.format(data['msg'])}
+        log["response_body"] = response_body
+        db.logs.insert_one(log)
+        return jsonify(response_body), 400
 
 @app.route("/pre-ping-data",methods=["POST"])
 def preping_data():
