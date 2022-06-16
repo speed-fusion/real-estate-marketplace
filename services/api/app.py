@@ -130,7 +130,9 @@ def generate_address_query(address,city,state,zipcode):
 def preping():
     data = validate_payload(request.get_json(),preping_schema)
     log = {}
-    log["ip_addr"] = request.remote_addr
+    headers_list = request.headers.getlist("X-Forwarded-For")
+    user_ip = headers_list[0] if headers_list else request.remote_addr
+    log["ip_addr"] = user_ip
     log["request_body"] = request.get_json()
     log["created_at"] = datetime.datetime.now()
     if data['ok']:
