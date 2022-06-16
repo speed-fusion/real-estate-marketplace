@@ -143,6 +143,7 @@ def preping():
         if property == None:
             response_body = {"result":"Reject"}
             log["response_body"] = response_body
+            log["message"] = "we don't have any data for this address"
             db.logs.insert_one(log)
             return jsonify(response_body), 200
                 
@@ -155,6 +156,7 @@ def preping():
             new_status = "Offer"
         response_body = {"result":new_status}
         log["response_body"] = response_body
+        log["message"] = message
         db.logs.insert_one(log)
         return jsonify(response_body), 200
     else:
