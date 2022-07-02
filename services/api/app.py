@@ -140,13 +140,25 @@ def preping():
         
         query = generate_address_query(data["address"],data["city"],data["state"],data["zip"])
         
-        property = mongo.db.properties.find_one({"query":query},{"status":0,"_id":0})
+        property = mongo.db.properties.find_one({"query":query,"status":"active"},{"status":0,"_id":0})
         
         if property == None:
             response_body = {"result":"Reject"}
             log["response_body"] = response_body
             log["message"] = "we don't have any data for this address"
             db.logs.insert_one(log)
+            
+            new_entry = {
+                "query":query,
+                "address":data["address"],
+                "city":data["city"],
+                "state":data["state"],
+                "zip":data["zip"],
+                "status":"pending"
+            }
+            
+            db.properties.insert_one(new_entry)
+            
             return jsonify(response_body), 200
                 
         status,message = property_validation.apply_validation(property)
